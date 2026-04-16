@@ -1,0 +1,17 @@
+endpoints:
+  - name: Google RDAP API - google.dev domain info
+    group: domain-monitors
+    # URL: https://rdap.org/domain/google.dev
+    # will resolve to the actual API endpoint: https://pubapi.registry.google/rdap/domain/google.dev
+    url: "https://pubapi.registry.google/rdap/domain/google.dev"
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+      # Watch when the status changes from ["pending delete"] to something else.
+      # this is the json:
+      # {... "status":["pending delete"] ...}
+      - "[BODY].status == [pending delete]"
+    alerts:
+      - type: discord
+        description: "Google.dev domain status changed from pending delete to some other status!"
+        send-on-resolved: true
