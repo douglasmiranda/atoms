@@ -1,0 +1,46 @@
+version: "3"
+
+tasks:
+  postgres-psql:
+    desc: Enter the Postgres container and run psql.
+    cmds:
+      - docker compose exec postgres sh -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB'
+
+  postgres-backup:
+    desc: Backup Postgres database to a local file (uses postgres custom format .dump).
+    vars:
+      BACKUP_FILE: "postgres-{{.TIMESTAMP}}.dump"
+    cmds:
+      - docker compose exec postgres sh -c 'pg_dump --verbose -U $POSTGRES_USER -d $POSTGRES_DB -Fc' > {{.BACKUP_FILE}}
+      - echo "Backup saved to {{.BACKUP_FILE}} on host machine."
+    preconditions:
+      - sh: test -w .
+        msg: "Current directory is not writable. Cannot save backup file."
+
+  postgres-restore:
+    desc: Restore Postgres database from a local backup file.
+    requires:
+      vars:
+        - BACKUP_FILE
+    prompt:
+      - This will restore the Postgres database from {{.BACKUP_FILE}}. Do you want to proceed?
+    cmds:
+      - task: postgres-install-extensions
+      # IMPORTANT: NOT EVERY PROJECT NEEDS THIS MIGRATION STEP.
+      # Some projects may need a migrate before restoring because of errors on restore like missing tables.
+      # - MAYBE RUN MIGRATION BEFORE RESTORE
+      - docker compose cp {{.BACKUP_FILE}} postgres:/tmp/{{.BACKUP_FILE}}
+      - docker compose exec postgres sh -c 'pg_restore -v -O -U $POSTGRES_USER -d $POSTGRES_DB -c < /tmp/{{.BACKUP_FILE}}'
+      - docker compose exec postgres rm /tmp/{{.BACKUP_FILE}}
+      - echo "Database restored from {{.BACKUP_FILE}}."
+    preconditions:
+      - sh: test -f "{{.BACKUP_FILE}}"
+        msg: "Backup file {{.BACKUP_FILE}} not found on host machine."
+
+  postgres-install-extensions:
+    desc: Install all necessary extensions in Postgres container.
+    vars:
+      EXTENSIONS: [unaccent, hstore]
+    cmds:
+      - for: { var: EXTENSIONS }
+        cmd: docker compose exec postgres sh -c 'psql -U $POSTGRES_USER -d $POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS {{.ITEM}};"'

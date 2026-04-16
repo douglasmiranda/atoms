@@ -1,0 +1,58 @@
+version: "3"
+
+tasks:
+  copy-envfiles-to-prod:
+    desc: Copy envfiles from envfiles/prod/*.env to production.
+    vars:
+      REMOTE_HOST: "username@999.999.999.99"
+      SSH_PORT: "22"
+      REMOTE_DIR: "/username/project-name/envfiles/prod/"
+      ENVFILES_GLOB: "envfiles/prod/*.env"
+      EXCLUDE_PATTERN: "*.env.template"
+      # example: .backups/2024-06-30/15h30m00s
+      BACKUP_DIR: ".backups/$(date +%Y-%m-%d/%Hh%Mm%Ss)"
+    prompt:
+      - This will copy envfiles from local envfiles/prod/*.env to the production server. Do you want to proceed?
+    cmds:
+      - |
+        rsync \
+        --verbose \
+        --progress \
+        --backup \
+        --backup-dir="{{.BACKUP_DIR}}" \
+        --rsh="ssh -p {{.SSH_PORT}}" \
+        --exclude='{{.EXCLUDE_PATTERN}}' \
+        {{.ENVFILES_GLOB}} \
+        "{{.REMOTE_HOST}}:{{.REMOTE_DIR}}"
+    # Preconditions could be good to clarify issues before running the task:
+    # preconditions:
+    #   - sh: test -d envfiles/prod
+    #     msg: "Local directory envfiles/prod not found."
+    #   - sh: test -n "$(ls envfiles/prod/*.env 2>/dev/null)"
+    #     msg: "No .env files found in envfiles/prod."
+    #   - sh: ssh -o BatchMode=yes -o ConnectTimeout=5 {{.REMOTE_HOST}} "echo OK"
+    #     msg: "Cannot connect to remote host {{.REMOTE_HOST}}. Check SSH connection before running this task."
+
+  copy-envfiles-to-prod-custom:
+    desc: Copy envfiles from envfiles/prod/*.env to production.
+    vars:
+      REMOTE_HOST: "{{.REMOTE_HOST}}"
+      SSH_PORT: "{{.SSH_PORT}}"
+      REMOTE_DIR: "/username/project-name/envfiles/prod/"
+      ENVFILES_GLOB: "envfiles/prod/*.env"
+      EXCLUDE_PATTERN: "*.env.template"
+      # example: .backups/2024-06-30/15h30m00s
+      BACKUP_DIR: ".backups/$(date +%Y-%m-%d/%Hh%Mm%Ss)"
+    prompt:
+      - This will copy envfiles from local envfiles/prod/*.env to the production server. Do you want to proceed?
+    cmds:
+      - |
+        rsync \
+        --verbose \
+        --progress \
+        --backup \
+        --backup-dir="{{.BACKUP_DIR}}" \
+        --rsh="ssh -p {{.SSH_PORT}}" \
+        --exclude='{{.EXCLUDE_PATTERN}}' \
+        {{.ENVFILES_GLOB}} \
+        "{{.REMOTE_HOST}}:{{.REMOTE_DIR}}"

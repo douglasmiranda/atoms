@@ -1,0 +1,58 @@
+version: "3"
+
+# IMPORTANT: You may need to add `interactive: true` to ~/.taskrc.yml to be able to use prompt and interactive tasks.
+
+# For better user experience, you can also add preconditions to check if there are any running services before trying to enter a container.
+# tasks:
+#   task-name:
+#     ... other task properties ...
+#     preconditions:
+#       - sh: test -n "$(docker compose ps --services --filter status=running)"
+#         msg: "No running services found. Start containers first."
+#
+# OTHER VALIDATIONS:
+# - Check if the specific service is running before trying to enter it.
+# tasks:
+#   task-name:
+#     ... other task properties ...
+#     preconditions:
+#       - sh: test -n "$(docker compose ps --services --filter status=running | grep -w {{.SERVICE}})"
+#         msg: "Service '{{.SERVICE}}' is not running. Please start the container first."
+
+tasks:
+  default:
+    desc: Default task. Shows help.
+    cmds:
+      - task --list
+
+  # Enter a running container by entering the inputs as cli args
+  # Usage: task enter-simple-1 -- app bash
+  enter-simple-1:
+    desc: "Enter a running container by entering the inputs as cli args. Usage: task enter-simple-1 -- app bash"
+    cmds:
+      - docker compose exec {{.CLI_ARGS}}
+
+  # Choose a command to enter a running container.
+  enter-with-cmd:
+    desc: "Choose a command to enter a running container."
+    requires:
+      vars:
+        - name: SERVICE
+          enum: [app, postgres, postgres2]
+        - name: CMD
+          enum: ["sh", "bash", "psql -U postgres"]
+    cmds:
+      - docker compose exec {{.SERVICE}} {{.CMD}}
+
+  # Enter container with default command based on the service name.
+  enter-with-default-cmd:
+    desc: "Enter a running container with the default command based on the service name."
+    vars:
+      SERVICE_SH:
+        map: { app: "sh", postgres: "bash", postgres2: "psql -U postgres" }
+    requires:
+      vars:
+        - name: SERVICE
+          enum: [app, postgres, postgres2]
+    cmds:
+      - docker compose exec {{.SERVICE}} {{index .SERVICE_SH .SERVICE}}

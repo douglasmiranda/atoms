@@ -1,0 +1,55 @@
+version: "3"
+
+tasks:
+  django-shell:
+    desc: Enter the Django container and run the shell.
+    cmds:
+      - docker compose exec django python manage.py shell
+
+  django-manage:
+    desc: "Enter the Django container and run a manage.py command. Usage: `task django-manage -- makemigrations`."
+    cmds:
+      - docker compose exec django python manage.py {{.CLI_ARGS}}
+
+  django-clean-setup:
+    desc: Django basic setup. To be run after the first build and run of the project.
+    prompt:
+      - This will install postgres extensions, run migrations, and load fixtures from local to the Django container. Do you want to proceed?
+    cmds:
+      # - task: postgres-install-extensions
+      - docker compose exec django python manage.py migrate
+      - docker compose cp ./fixtures/dumpdata-django.json django:/app/dumpdata-django.json
+      - docker compose exec django python manage.py loaddata /app/dumpdata-django.json
+      - docker compose exec django rm /app/dumpdata-django.json
+    preconditions:
+      - sh: test -f ./fixtures/dumpdata-django.json
+        msg: "Local fixture file ./fixtures/dumpdata-django.json not found."
+
+  debug:
+    desc: Attach to the Django container (to be used after setting breakpoint() in code).
+    cmds:
+      - docker compose attach django --detach-keys 'ctrl-c'
+
+  coverage:
+    desc: Run coverage + pytest in the running Django container and show report.
+    cmds:
+      - docker compose exec django coverage run -m pytest
+      - docker compose exec django coverage report -m
+
+  clean-py:
+    desc: Clean Python artifacts (cache, tests, build stuff).
+    cmds:
+      - |
+        find ./ -name '*.pyc' -exec rm -f {} + \
+        && find ./ -name '*.pyo' -exec rm -f {} + \
+        && find ./ -name '*~' -exec rm -f {} + \
+        && find ./ -name '__pycache__' -exec rm -fr {} + \
+        && find ./ -name '.pytest_cache' -exec rm -fr {} + \
+        && find ./ -name '.ipython' -exec rm -fr {} + \
+        && find ./ -name '*.egg-info' -exec rm -fr {} + \
+        && find ./ -name '*.egg' -exec rm -f {} +
+
+  flush-cache:
+    desc: Clear cache.
+    cmds:
+      - docker compose exec django python manage.py shell -c "from django.core.cache import cache; cache.clear()"

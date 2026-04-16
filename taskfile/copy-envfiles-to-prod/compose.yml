@@ -1,0 +1,6 @@
+services:
+  sshd:
+    build:
+      context: .
+    ports:
+      - 2222:22

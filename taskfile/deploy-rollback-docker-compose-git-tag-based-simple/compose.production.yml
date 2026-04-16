@@ -1,0 +1,6 @@
+services:
+  django:
+    image: my_project/django-prod:${VERSION:-latest}
+    build:
+      context: ./my_project/
+      target: prod

@@ -1,0 +1,18 @@
+services:
+  app:
+    image: nginx:alpine
+
+  postgres:
+    # Using postgres:trixie (based on Debian Trixie)
+    # Just so we have bash as the prefered way to enter the container for this example.
+    image: postgres:trixie
+    environment:
+      # https://hub.docker.com/_/postgres#postgres_host_auth_method
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  postgres2:
+    # Just another postgres service to show we can enter directly inside the psql client.
+    image: postgres:alpine
+    environment:
+      # https://hub.docker.com/_/postgres#postgres_host_auth_method
+      POSTGRES_HOST_AUTH_METHOD: trust

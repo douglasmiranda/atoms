@@ -1,0 +1,57 @@
+version: "3"
+
+tasks:
+  deploy:
+    desc: Deploy the project to production.
+    vars:
+      GIT_COMMIT:
+        # obtain the short git commit hash to use as version tag for the docker image
+        sh: git rev-parse --short HEAD
+      VERSION:
+        # use the git commit hash as version tag for the docker image
+        # check docker compose commands and the compose.production.yml file
+        ref: .GIT_COMMIT
+      REMOTE_HOST: "username@host-ip-address"
+      REMOTE_DIR: "/username/project-name/"
+      DOCKER_COMPOSE: "VERSION={{.VERSION}} docker compose -f compose.production.yml"
+    prompt:
+      - This will deploy version {{.VERSION}} to production. Do you want to proceed?
+    cmds:
+      - cmd: echo "Deploying {{.VERSION}} to production..."
+        silent: true
+      - git push
+      - |
+        ssh -o BatchMode=yes -o ConnectTimeout=5 {{.REMOTE_HOST}} \
+        "cd {{.REMOTE_DIR}} && \
+         git pull && \
+         {{.DOCKER_COMPOSE}} build && \
+         {{.DOCKER_COMPOSE}} stop && \
+         {{.DOCKER_COMPOSE}} up -d
+        "
+    preconditions:
+      - sh: ssh -o BatchMode=yes -o ConnectTimeout=5 {{.REMOTE_HOST}} "echo OK"
+        msg: "Cannot connect to remote host {{.REMOTE_HOST}}. Check SSH connection before running this task."
+      - sh: "{{.DOCKER_COMPOSE}} build --dry-run"
+        msg: "Docker compose build failed. Check configuration before running this task."
+
+  # task rollback:VERSION
+  rollback:*:
+    desc: "Rollback to a previous version in production. Usage: `task rollback:a5b2344` (where a5b2344 is the short git commit hash to rollback to)."
+    vars:
+      REMOTE_HOST: "username@host-ip-address"
+      REMOTE_DIR: "/username/project-name/"
+      VERSION: "{{index .MATCH 0}}"
+    prompt:
+      - This will rollback to version {{.VERSION}} in production. Do you want to proceed?
+    cmds:
+      - cmd: echo "Rolling back to {{.VERSION}} in production..."
+        silent: true
+      - |
+        ssh -o BatchMode=yes -o ConnectTimeout=5 {{.REMOTE_HOST}} \
+        "cd {{.REMOTE_DIR}} && \
+         docker compose -f compose.production.yml stop && \
+         VERSION={{.VERSION}} docker compose -f compose.production.yml up -d
+        "
+    preconditions:
+      - sh: ssh -o BatchMode=yes -o ConnectTimeout=5 {{.REMOTE_HOST}} "echo OK"
+        msg: "Cannot connect to remote host {{.REMOTE_HOST}}. Check SSH connection before running this task."
