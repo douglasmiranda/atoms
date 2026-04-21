@@ -1,0 +1,9 @@
+services:
+  app:
+    init: true
+    build: .
+    volumes:
+      - data:/data
+
+volumes:
+  data: {}

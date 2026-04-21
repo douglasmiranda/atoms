@@ -1,0 +1,13 @@
+services:
+  app:
+    init: true
+    build:
+      context: .
+      # Example: docker compose build --build-arg UID=1001 --build-arg GID=1001 app
+      # optional: if you want to pass the UID and GID as build arguments, you can do it here
+      # also, you can set default values in the Dockerfile using ARG
+      args:
+        - "UID=${UID:-1000}"
+        - "GID=${GID:-1000}"
+    volumes:
+      - ./data:/data

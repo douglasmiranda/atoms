@@ -1,0 +1,12 @@
+services:
+  app:
+    init: true
+    build: .
+    environment:
+      APP_UID: "${APP_UID:-1001}"
+      APP_GID: "${APP_GID:-1001}"
+    volumes:
+      - data:/data
+
+volumes:
+  data: {}
