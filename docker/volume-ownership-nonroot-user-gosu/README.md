@@ -46,6 +46,8 @@ Using `gosu` in an entrypoint is useful when:
 - You run a single image across environments where ownership requirements differ.
 - You need a cleaner privilege drop than `su`, without spawning an extra shell process.
 
-## Related example
+## Related snippets
 
-If fixed IDs at build time are enough, see [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md).
+- Fixed non-root user with named volume: [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md)
+- Match container UID/GID with host for bind mounts: [docker/volume-ownership-match-with-host](../volume-ownership-match-with-host/README.md)
+- Bind mount with ACLs for different host/container UIDs: [docker/volume-ownership-fix-with-setfacl](../volume-ownership-fix-with-setfacl/README.md)

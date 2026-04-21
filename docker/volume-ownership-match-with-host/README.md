@@ -34,6 +34,8 @@ ls -lah ./data/testfile
 
 The file owner on the host and in the container should match your UID/GID.
 
-## Related example
+## Related snippets
 
-If you want a simpler setup with fixed IDs and a named volume, see [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md).
+- Fixed non-root user with named volume: [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md)
+- Runtime ownership fix with `gosu`: [docker/volume-ownership-nonroot-user-gosu](../volume-ownership-nonroot-user-gosu/README.md)
+- Bind mount with ACLs for different host/container UIDs: [docker/volume-ownership-fix-with-setfacl](../volume-ownership-fix-with-setfacl/README.md)
