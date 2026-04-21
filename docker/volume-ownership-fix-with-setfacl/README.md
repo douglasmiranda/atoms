@@ -137,6 +137,91 @@ getfacl data data/a
 - If your goal is identical ownership on both sides, prefer matching host/container UID/GID directly.
 - ACL support depends on filesystem and mount options.
 
+## setfacl flags
+
+Annotations for `setfacl` flags. Basically to remind myself when to use which:
+
+`-m, --modify=acl`
+
+Purpose: Add or update ACL entries on target objects.
+Use when: You want to grant/change rights without replacing the whole ACL.
+Example idea: add user 1001 rwx on a directory.
+
+`-M, --modify-file=file`
+
+Purpose: Same as `-m`, but read many entries from a file.
+Use when: Applying a prepared ACL snippet repeatedly.
+
+`-x, --remove=acl`
+
+Purpose: Remove specific ACL entries.
+Use when: Revoking one user/group entry but leaving others.
+
+`-X, --remove-file=file`
+
+Purpose: Remove entries listed in a file.
+Use when: Bulk cleanup of selected ACL entries.
+
+`-b, --remove-all`
+
+Purpose: Remove all extended ACL entries (named users/groups and mask), keeping base owner/group/other.
+Use when: Resetting object ACLs to simple mode quickly.
+
+`-k, --remove-default`
+
+Purpose: Remove default ACL from a directory.
+Use when: Stop inheritance behavior for newly created children.
+
+`--set=acl`
+
+Purpose: Replace the entire ACL with exactly what you provide.
+Use when: You want a strict, known ACL state.
+Caution: Destructive to existing extended entries.
+
+`--set-file=file`
+
+Purpose: Same as `--set`, but ACL definition comes from file.
+Use when: Reproducible ACL deployments from saved templates.
+
+`--mask`
+
+Purpose: Recalculate/update mask entry from ACL contents.
+Use when: You want effective rights recomputed explicitly.
+Note: Mask limits effective permissions of named users/groups (and group class).
+
+`-n, --no-mask`
+
+Purpose: Do not recalculate mask.
+Use when: You intentionally manage mask yourself and do not want `setfacl` to adjust it.
+
+`-d, --default`
+
+Purpose: Apply operation to default ACL (directory inheritance ACL), not normal access ACL.
+Use when: You need future files/subdirs to inherit ACL entries.
+Important: Only meaningful on directories.
+
+`-R, --recursive`
+
+Purpose: Apply operation recursively through directory tree.
+Use when: You need to update many existing files/subdirs at once.
+Note: Recursive affects existing objects; default ACL still governs future ones.
+
+`-L, --logical`
+
+Purpose: During recursive walk, follow symlinked directories.
+Use when: You want traversal to include targets behind symlinks.
+
+`-P, --physical`
+
+Purpose: During recursive walk, do not follow symlinks (operate on links as links).
+Use when: You want safer, non-following behavior.
+
+`--restore=file`
+
+Purpose: Restore ACLs from a backup file produced by `getfacl -R`.
+Use when: Recovering ACL state after migrations/incidents.
+
+
 ## Related snippets
 
 - Match container UID/GID with host for simpler ownership: [docker/volume-ownership-match-with-host](../volume-ownership-match-with-host/README.md)
