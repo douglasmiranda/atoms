@@ -9,7 +9,7 @@ This snippet:
 - Computes the filled percentage as:
 
 $$
-\text{filled\_percentage} = \frac{\text{height\_usage}}{\text{height\_available}} \times 100
+	\text{filled percentage} = \frac{\text{height usage}}{\text{height available}} \times 100
 $$
 
 ## Files
