@@ -1,0 +1,46 @@
+services:
+  data_volume_init:
+    image: alpine:latest
+    volumes:
+      - data_volume:/data_volume
+    # Set ownership and permissions for the data_volume, then exit successfully
+    # for more complex scripting, you could just either mount a script into the container
+    # or use a custom image with the script baked in
+    # Running this as root is necessary to change ownership and permissions
+    command:
+      [
+        "sh",
+        "-c",
+        "chown -R ${APP_UID:-1000}:${APP_UID:-1000} /data_volume && chmod -R
+          u+rwX,g+rwX /data_volume",
+      ]
+    restart: "no"
+
+  app:
+    init: true
+    image: alpine:latest
+    volumes:
+      - data_volume:/data_volume
+    # Run app with a non-root user that matches the ownership set by the data_volume_init service
+    user: "${APP_UID:-1000}:${APP_UID:-1000}"
+    # touch a file to indicate that the app is running with correct permissions, then sleep indefinitely
+    command:
+      - "sh"
+      - "-c"
+      - |
+        touch /data_volume/app_running && \
+        echo 'App is running with correct permissions!' && \
+        sleep infinity
+    depends_on:
+      data_volume_init:
+        # Wait for the data_volume_init service to complete successfully before starting the app service
+        condition: service_completed_successfully
+
+volumes:
+  data_volume: {}
+
+# Test:
+# docker compose exec app id
+# docker compose exec app ls -lah /data_volume
+# docker compose exec app touch /data_volume/testfile
+# docker compose exec app ls -lah /data_volume/testfile

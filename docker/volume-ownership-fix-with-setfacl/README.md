@@ -227,3 +227,4 @@ Use when: Recovering ACL state after migrations/incidents.
 - Match container UID/GID with host for simpler ownership: [docker/volume-ownership-match-with-host](../volume-ownership-match-with-host/README.md)
 - Fixed non-root user with named volume: [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md)
 - Runtime ownership fix with `gosu`: [docker/volume-ownership-nonroot-user-gosu](../volume-ownership-nonroot-user-gosu/README.md)
+- One-shot side container to initialize volume permissions: [docker/volume-permissions-fix-with-one-shot-side-container](../volume-permissions-fix-with-one-shot-side-container/README.md)

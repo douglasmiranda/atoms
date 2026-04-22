@@ -39,3 +39,4 @@ The file owner on the host and in the container should match your UID/GID.
 - Fixed non-root user with named volume: [docker/volume-ownership-nonroot-user](../volume-ownership-nonroot-user/README.md)
 - Runtime ownership fix with `gosu`: [docker/volume-ownership-nonroot-user-gosu](../volume-ownership-nonroot-user-gosu/README.md)
 - Bind mount with ACLs for different host/container UIDs: [docker/volume-ownership-fix-with-setfacl](../volume-ownership-fix-with-setfacl/README.md)
+- One-shot side container to initialize volume permissions: [docker/volume-permissions-fix-with-one-shot-side-container](../volume-permissions-fix-with-one-shot-side-container/README.md)

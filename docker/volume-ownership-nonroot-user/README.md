@@ -43,3 +43,4 @@ You should see files owned by UID `1001` and GID `1001`.
 - Match container UID/GID with host for bind mounts: [docker/volume-ownership-match-with-host](../volume-ownership-match-with-host/README.md)
 - Runtime ownership fix with `gosu`: [docker/volume-ownership-nonroot-user-gosu](../volume-ownership-nonroot-user-gosu/README.md)
 - Bind mount with ACLs for different host/container UIDs: [docker/volume-ownership-fix-with-setfacl](../volume-ownership-fix-with-setfacl/README.md)
+- One-shot side container to initialize volume permissions: [docker/volume-permissions-fix-with-one-shot-side-container](../volume-permissions-fix-with-one-shot-side-container/README.md)
