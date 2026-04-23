@@ -28,6 +28,7 @@ The idea is to keep it minimal, no dependencies when possible.
 - [Docker volume permissions for a non-root user](docker/volume-ownership-nonroot-user/README.md)
 - [Docker volume ownership for a non-root user with gosu](docker/volume-ownership-nonroot-user-gosu/README.md)
 - [Docker volume permissions fix with a one-shot side container](docker/volume-permissions-fix-with-one-shot-side-container/README.md)
+- [Docker healthchecks](docker/healthchecks/README.md)
 
 ### Gatus
 
