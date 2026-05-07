@@ -16,6 +16,7 @@ Some other snippets could come with additional files for testing, documentation,
 
 # Agent Working Rules
 
+- Use space indentation for YAML files.
 - Keep in mind that the subtopic directory is the root for the snippet we are working on. So, from that folder onwards is related to that snippet.
 - Keep it minimal, no dependencies when possible.
 - Each snippet should be self-contained as much as possible.
