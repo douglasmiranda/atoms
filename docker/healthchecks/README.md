@@ -26,7 +26,7 @@ On Caddyfile:
 	}
 }
 
-0.0.0.0:7777 {
+:7777 {
 	respond "OK" 200
 }
 ```
@@ -40,8 +40,17 @@ caddy:
     start_period: 5s
     test:
       - "CMD-SHELL"
-      - "wget --no-verbose --tries=1 --spider https://0.0.0.0:7777"
+      - "curl -fsS http://127.0.0.1:7777/ >/dev/null"
 ```
+
+### Possible issues
+
+Caddy + wget for healthcheck on a non-https endpoint could result in spawing multiple *ssl_client* zombie processes. So avoid `wget --no-verbose --tries=1 --spider https://0.0.0.0:7777/`, unless you verify it.
+
+Possible explanation: wget tries to do TLS to a non-TLS endpoint, which can trigger repeated failed SSL handshakes and subprocess cleanup issues. Links:
+
+- https://github.com/caddyserver/caddy-docker/issues/276
+- https://github.com/orgs/portainer/discussions/10314
 
 ## Redis
 
