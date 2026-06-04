@@ -37,6 +37,7 @@ The idea is to keep it minimal, no dependencies when possible.
 ### Python
 
 - [Extract Date From String And Classify](python/extract-date-from-string-and-classify/README.md)
+- [Gunicorn Test RPS (Flask)](python/gunicorn/gunicorn-test-rps/README.md)
 - [PyMuPDF - Calculate how much height of a page is filled with content](python/pymupdf-calc-how-much-height-of-page-is-filled-with-content/README.md)
 
 ### Taskfile
