@@ -12,11 +12,13 @@ The idea is to keep it minimal, no dependencies when possible.
 
 ### Django
 
+- [Add Data Attributes to Select Option Widget](django/add-data-fields-to-select-option-widget/README.md)
 - [Base Inline Formset Custom Attr Delete Button](django/base-inline-formset-custom-attr-delete-btn/forms.py)
 - [Check If Current View Is Django Admin Changelist](django/check-if-current-view-is-changelist-view/README.md)
 - [Django Admin - Pretty Print (formatted / idented / no color) JSON (read-only)](django/django-admin-json-pretty-print/README.md)
 - [Django (postgres) ArrayField Multiple Choices as checkboxes](django/django-arrayfield-multi-choices-checkboxes/README.md)
 - [Django Simple Auth Token Authorization](django/django-simple-auth-token-authorization/README.md)
+- [Elasticsearch date range helpers (Django)](django/elasticsearch-utils/README.md)
 - [Django Form Tweaks Mixin](django/form-tweaks-mixin/README.md)
 - [Reorder Django Choices](django/reorder-django-choices/README.md)
 - [Django URL Path Date Converter](django/url-path-date-converter/README.md)
@@ -33,6 +35,10 @@ The idea is to keep it minimal, no dependencies when possible.
 ### Gatus
 
 - [Monitor when a domain changes status](gatus/monitor-domains/README.md)
+
+### JavaScript
+
+- [Overflow masks on scroll](js/overflow-masks-on-scroll/README.md)
 
 ### Python
 
