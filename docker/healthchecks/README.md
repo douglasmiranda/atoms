@@ -14,6 +14,14 @@ postgres:
       # maybe use specific credentials and database
 ```
 
+Or:
+```yaml
+#...
+    test:
+      - "CMD-SHELL"
+      - "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"
+```
+
 ## Caddy
 
 For Caddy let's check if Caddy is responding and ignore the reverse proxy target.
