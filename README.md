@@ -56,6 +56,7 @@ The idea is to keep it minimal, no dependencies when possible.
 
 ### VMs
 
+- [Clone an Incus VM](vms/INCUS-CLONE-VM.md)
 - [Incus VM helper scripts](vms/vm-scripts/README.md)
 
 
