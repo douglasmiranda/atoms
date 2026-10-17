@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Mount the Incus virtiofs share at boot. Attach it on the host first:
+#   incus config device add <vm> share disk source=/home/doug/vm-share path=/mnt/share
+# Usage: vm-share [on|off|toggle|status]   (default: toggle)
+# Env: SHARE_TAG (default incus_share, i.e. incus_<device name>), SHARE_PATH (default /mnt/share)
+set -euo pipefail
+
+tag=${SHARE_TAG:-incus_share}
+where=${SHARE_PATH:-/mnt/share}
+unit=$(systemd-escape --path --suffix=mount "$where")
+file=/etc/systemd/system/$unit
+
+is_on() { systemctl is-enabled --quiet "$unit" 2>/dev/null; }
+
+on() {
+  if systemctl is-active --quiet incus-agent 2>/dev/null; then
+    echo "note: incus-agent is running and already mounts shares; this unit may conflict" >&2
+  fi
+  mkdir -p "$where"
+  cat >"$file" <<EOF
+[Unit]
+Description=Incus share $tag at $where
+
+[Mount]
+What=$tag
+Where=$where
+Type=virtiofs
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl enable "$unit"
+  systemctl start "$unit" ||
+    echo "enabled, but mounting failed now: is the share attached? check: dmesg | grep -i virtiofs" >&2
+}
+
+off() {
+  systemctl stop "$unit" 2>/dev/null || echo "could not unmount $where (in use?): fuser -vm $where" >&2
+  systemctl disable "$unit" 2>/dev/null || true
+  rm -f "$file"
+  systemctl daemon-reload
+}
+
+status() {
+  local state=off mounted="not mounted"
+  is_on && state=on
+  mountpoint -q "$where" && mounted=mounted
+  echo "share: $state at boot, $where $mounted"
+}
+
+action=${1:-toggle}
+if [[ $action != status && $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+
+case $action in
+  on) on ;;
+  off) off ;;
+  toggle) if is_on; then off; else on; fi ;;
+  status) ;;
+  *) echo "usage: ${0##*/} [on|off|toggle|status]" >&2; exit 2 ;;
+esac
+status

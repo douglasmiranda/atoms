@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Incus guest agent: lets the host run `incus exec` / `incus file` in this VM without a password
+# and auto-mounts shares. `on` installs it from the Incus config drive the first time.
+# `off` masks it, because udev would otherwise start it again when the VM boots.
+# Usage: vm-agent [on|off|toggle|status]   (default: toggle)
+set -euo pipefail
+
+unit=incus-agent.service
+
+installed() { [[ -n $(systemctl list-unit-files --no-legend "$unit" 2>/dev/null) ]]; }
+is_on() { installed && [[ $(systemctl is-enabled "$unit" 2>/dev/null) != masked ]]; }
+
+install_agent() {
+  local d
+  d=$(mktemp -d)
+  if ! mount -t virtiofs config "$d" 2>/dev/null && ! mount -t 9p config "$d" 2>/dev/null; then
+    rmdir "$d"
+    echo "Incus config drive not found. On the host run:" >&2
+    echo "  incus config device add <vm> agent disk source=agent:config" >&2
+    echo "then reboot the VM, mount the new small disk (lsblk) and run its install.sh" >&2
+    exit 1
+  fi
+  (cd "$d" && ./install.sh)
+  umount "$d"
+  rmdir "$d"
+}
+
+on() {
+  installed || install_agent
+  systemctl unmask "$unit"
+  systemctl start "$unit" || echo "agent installed; it will start on the next boot" >&2
+}
+
+off() {
+  echo "note: any shell opened with incus exec ends when the agent stops" >&2
+  systemctl mask --now "$unit"
+}
+
+status() {
+  local state=off running=stopped
+  installed || { echo "agent: not installed"; return; }
+  is_on && state=on
+  systemctl is-active --quiet "$unit" && running=running
+  echo "agent: $state, $running"
+}
+
+action=${1:-toggle}
+if [[ $action != status && $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+
+case $action in
+  on) on ;;
+  off) off ;;
+  toggle) if is_on; then off; else on; fi ;;
+  status) ;;
+  *) echo "usage: ${0##*/} [on|off|toggle|status]" >&2; exit 2 ;;
+esac
+status

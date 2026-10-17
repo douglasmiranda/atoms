@@ -54,6 +54,10 @@ The idea is to keep it minimal, no dependencies when possible.
 - [Enter Running Containers](taskfile/enter-running-containers/README.md)
 - [Postgres Utils](taskfile/postgres-utils/Taskfile.yml)
 
+### VMs
+
+- [Incus VM helper scripts](vms/vm-scripts/README.md)
+
 
 ## Contributing
 

@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Cut the VM off the network (all virtual NICs) or bring it back. Not persistent: every boot starts online.
+# This is a guest-side switch that root in the VM can undo; for real isolation detach the NIC on the host:
+#   incus config device add <vm> eth0 none      (undo: incus config device remove <vm> eth0)
+# Usage: vm-net [on|off|toggle|status]   (default: toggle)
+set -euo pipefail
+
+mapfile -t nics < <(for d in /sys/class/net/*; do [[ -e $d/device ]] && basename "$d"; done)
+
+is_on() {
+  local n
+  for n in "${nics[@]}"; do
+    [[ $(cat "/sys/class/net/$n/operstate") == up ]] && return 0
+  done
+  return 1
+}
+
+on() {
+  local n
+  for n in "${nics[@]}"; do
+    ip link set "$n" up
+    if systemctl is-active --quiet systemd-networkd; then
+      networkctl reconfigure "$n"
+    elif command -v ifup >/dev/null && ifquery "$n" >/dev/null 2>&1; then
+      ifdown --force "$n" 2>/dev/null || true
+      ifup "$n"
+    fi
+  done
+}
+
+off() {
+  local n
+  for n in "${nics[@]}"; do
+    if command -v ifdown >/dev/null && ifquery "$n" >/dev/null 2>&1; then
+      ifdown --force "$n" 2>/dev/null || true
+    fi
+    ip link set "$n" down
+  done
+}
+
+status() {
+  local n addr
+  for n in "${nics[@]}"; do
+    addr=$(ip -4 -br addr show "$n" | awk '{print $3}')
+    echo "net: $n $(cat "/sys/class/net/$n/operstate")${addr:+ $addr}"
+  done
+}
+
+if [[ ${#nics[@]} -eq 0 ]]; then
+  echo "no network interfaces found" >&2
+  exit 1
+fi
+
+action=${1:-toggle}
+if [[ $action != status && $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+
+case $action in
+  on) on ;;
+  off) off ;;
+  toggle) if is_on; then off; else on; fi ;;
+  status) ;;
+  *) echo "usage: ${0##*/} [on|off|toggle|status]" >&2; exit 2 ;;
+esac
+[[ $action == on || $action == toggle ]] && sleep 3
+status

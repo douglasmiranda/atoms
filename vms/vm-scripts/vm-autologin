@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Passwordless login on the VGA console (tty1) and the serial console (ttyS0, used by `incus console`).
+# Usage: vm-autologin [on|off|toggle|status] [user]   (default: toggle; user defaults to UID 1000, else root)
+set -euo pipefail
+
+units=(getty@tty1 serial-getty@ttyS0)
+conf=autologin.conf
+
+is_on() { [[ -f /etc/systemd/system/${units[0]}.service.d/$conf ]]; }
+
+on() {
+  local user=${1:-$(getent passwd 1000 | cut -d: -f1 || true)}
+  user=${user:-root}
+  id "$user" >/dev/null
+
+  mkdir -p /etc/systemd/system/getty@tty1.service.d /etc/systemd/system/serial-getty@ttyS0.service.d
+  cat >/etc/systemd/system/getty@tty1.service.d/$conf <<EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $user --noclear %I \$TERM
+EOF
+  cat >/etc/systemd/system/serial-getty@ttyS0.service.d/$conf <<EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $user --keep-baud 115200,57600,38400,9600 %I \$TERM
+EOF
+  systemctl daemon-reload
+}
+
+off() {
+  local u
+  for u in "${units[@]}"; do
+    rm -f "/etc/systemd/system/$u.service.d/$conf"
+    rmdir --ignore-fail-on-non-empty "/etc/systemd/system/$u.service.d" 2>/dev/null || true
+  done
+  systemctl daemon-reload
+}
+
+status() {
+  if is_on; then
+    echo "autologin: on ($(grep -oP -- '--autologin \K\S+' "/etc/systemd/system/${units[0]}.service.d/$conf"))"
+  else
+    echo "autologin: off"
+  fi
+}
+
+action=${1:-toggle}
+if [[ $action != status && $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+
+case $action in
+  on) on "${2:-}" ;;
+  off) off ;;
+  toggle) if is_on; then off; else on "${2:-}"; fi ;;
+  status) ;;
+  *) echo "usage: ${0##*/} [on|off|toggle|status] [user]" >&2; exit 2 ;;
+esac
+status
+[[ $action == status ]] || echo "takes effect at the next login prompt (log out, or reboot)"

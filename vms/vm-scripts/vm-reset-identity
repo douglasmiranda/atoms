@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Give a cloned VM its own identity: hostname, machine ID, SSH host keys, DHCP client ID.
+# Without this, clones can be handed the same IPv4 address and share SSH host keys.
+# Usage: vm-reset-identity <new-hostname>
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+if [[ $# -ne 1 ]]; then
+  echo "usage: ${0##*/} <new-hostname>" >&2
+  exit 2
+fi
+
+new=$1
+old=$(hostname)
+
+hostnamectl set-hostname "$new"
+if grep -q '^127\.0\.1\.1' /etc/hosts; then
+  sed -i "s/^127\.0\.1\.1.*/127.0.1.1\t$new/" /etc/hosts
+else
+  printf '127.0.1.1\t%s\n' "$new" >>/etc/hosts
+fi
+echo "hostname: $old -> $new"
+
+rm -f /etc/machine-id /var/lib/dbus/machine-id
+systemd-machine-id-setup
+[[ -d /var/lib/dbus ]] && ln -sf /etc/machine-id /var/lib/dbus/machine-id
+rm -f /var/lib/systemd/random-seed
+
+rm -f /var/lib/dhcpcd/duid /var/lib/dhcpcd/secret /var/lib/dhcpcd/*.lease* /var/lib/dhcp/*.leases
+echo "machine ID and DHCP client IDs regenerated"
+
+if [[ -d /etc/ssh ]]; then
+  rm -f /etc/ssh/ssh_host_*
+  ssh-keygen -A
+  echo "SSH host keys regenerated (remove the old entry on clients: ssh-keygen -R <host>)"
+fi
+
+if lsblk -rno FSTYPE | grep -qx crypto_LUKS; then
+  echo "note: the LUKS key is still shared with the original VM; for an independent key run:"
+  echo "  cryptsetup reencrypt /dev/<luks partition>   (find it with: lsblk -f)"
+fi
+
+echo "reboot now to apply everything: systemctl reboot"

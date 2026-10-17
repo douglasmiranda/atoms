@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# OpenSSH server, now and at boot. Installs openssh-server on first `on`.
+# Turning it off keeps already-open SSH sessions alive; it only stops new ones.
+# Usage: vm-ssh [on|off|toggle|status]   (default: toggle)
+set -euo pipefail
+
+is_on() {
+  systemctl is-enabled --quiet ssh.service 2>/dev/null || systemctl is-enabled --quiet ssh.socket 2>/dev/null
+}
+
+on() {
+  if ! dpkg-query -W -f='${Status}' openssh-server 2>/dev/null | grep -q 'install ok installed'; then
+    apt-get update
+    apt-get install -y openssh-server
+  fi
+  systemctl enable --now ssh.service
+}
+
+off() {
+  local u
+  for u in ssh.socket ssh.service; do
+    systemctl disable --now "$u" 2>/dev/null || true
+  done
+}
+
+status() {
+  local state=off running=stopped
+  is_on && state=on
+  systemctl is-active --quiet ssh.service 2>/dev/null && running=running
+  echo "ssh: $state at boot, $running"
+}
+
+action=${1:-toggle}
+if [[ $action != status && $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/} $*" >&2
+  exit 1
+fi
+
+case $action in
+  on) on ;;
+  off) off ;;
+  toggle) if is_on; then off; else on; fi ;;
+  status) ;;
+  *) echo "usage: ${0##*/} [on|off|toggle|status]" >&2; exit 2 ;;
+esac
+status

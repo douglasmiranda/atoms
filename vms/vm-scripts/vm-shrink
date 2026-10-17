@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Free space inside the VM and hand it back to the host, so the sparse disk file and exports stay small.
+# Run before `incus export` / `incus copy`.
+# Usage: vm-shrink
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+  echo "run as root: sudo ${0##*/}" >&2
+  exit 1
+fi
+
+apt-get autoremove --purge -y
+apt-get clean
+journalctl --vacuum-size=50M
+rm -rf /var/tmp/* /tmp/* 2>/dev/null || true
+
+if lsblk -rno FSTYPE | grep -qx crypto_LUKS && ! dmsetup table --target crypt | grep -q allow_discards; then
+  echo "warning: LUKS is not passing discards through, so freed space is not returned to the host." >&2
+  echo "  add 'discard' to the options column in /etc/crypttab (e.g. luks,discard), then:" >&2
+  echo "  update-initramfs -u && systemctl reboot" >&2
+fi
+
+fstrim -av
