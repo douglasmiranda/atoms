@@ -1,6 +1,6 @@
 # Incus VM helper scripts
 
-[vm-scripts](./vm-scripts)
+[vm-scripts](./)
 
 Small guest-side scripts for Debian/Ubuntu Incus VMs. Copy them into the VM and install them under `/usr/local/sbin`. Most commands take `[on|off|toggle|status]` and default to `toggle`. Run them as root (`sudo`).
 
