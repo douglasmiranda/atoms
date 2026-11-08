@@ -4,7 +4,7 @@ This snippet shows how to make a Docker volume writable by a non-root container 
 
 This is how I prefer most of the time. There are other ways to deal with.
 
-The necessecity of this approach is that when you mount a volume, it is owned by `root:root` by default. (unless you running rootless docker)
+The necessity of this approach is that when you mount a volume, it is owned by `root:root` by default. (unless you are running rootless docker)
 
 The idea is simple:
 

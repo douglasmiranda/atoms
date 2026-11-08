@@ -8,7 +8,7 @@ Run the sample containers with:
 docker compose up -d
 ```
 
-Task definitions in: [Taskfile.yaml](./Taskfile.yaml)
+Task definitions in: [Taskfile.yml](./Taskfile.yml)
 
 `enter-simple-1` - Enter the `postgres` container and run `psql` command.
 

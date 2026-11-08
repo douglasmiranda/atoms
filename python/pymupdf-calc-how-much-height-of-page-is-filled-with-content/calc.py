@@ -45,37 +45,37 @@ def page_height_usage(page: pymupdf.Page, margins: Margin):
 
     height_available = content_rect.height
     height_usage = float(0)
-    print("height_available", height_available)
 
     page.set_cropbox(content_rect)
 
     text_blocks = page.get_text("blocks")
 
     for block in text_blocks:
-        # print(block)
         # y1 is basically (in this context) the distance to the top of our
         # content area (cropbox)
         y1 = block[3]
-        # only couting the block that's farthest from the top
+        # only counting the block that's farthest from the top
         if y1 > height_usage:
             height_usage = y1
 
-    print("height_usage", height_usage)
+    if height_available <= 0:
+        return 0.0
     filled_percentage = (height_usage / height_available) * 100
     return filled_percentage
 
 
-doc = pymupdf.open("pdfs/example.pdf")
+if __name__ == "__main__":
+    doc = pymupdf.open("pdfs/example.pdf")
 
-# Define the margins (in points)
-# That way we define that header, footer, and left and right margins are not part of the content area.
-# This basically will define the cropbox that will be used to calculate the height usage.
-margin = Margin(top=77, bottom=30, left=35, right=35)
+    # Define the margins (in points)
+    # That way we define that header, footer, and left and right margins are not part of the content area.
+    # This basically will define the cropbox that will be used to calculate the height usage.
+    margin = Margin(top=77, bottom=30, left=35, right=35)
 
-for page in doc:
-    print("Cropbox:", page.cropbox)
-    filled_percentage = page_height_usage(page, margin)
-    print(
-        f"Page {page.number + 1}: has {filled_percentage:.2f}% of its height content area filled."
-    )
-    print("-" * 80 + "\n")
+    for page in doc:
+        print("Cropbox:", page.cropbox)
+        filled_percentage = page_height_usage(page, margin)
+        print(
+            f"Page {page.number + 1}: has {filled_percentage:.2f}% of its height content area filled."
+        )
+        print("-" * 80 + "\n")

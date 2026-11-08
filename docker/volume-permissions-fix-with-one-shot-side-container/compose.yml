@@ -11,8 +11,7 @@ services:
       [
         "sh",
         "-c",
-        "chown -R ${APP_UID:-1000}:${APP_UID:-1000} /data_volume && chmod -R
-          u+rwX,g+rwX /data_volume",
+        "chown -R ${APP_UID:-1000}:${APP_GID:-1000} /data_volume && chmod -R u+rwX,g+rwX /data_volume",
       ]
     restart: "no"
 
@@ -22,7 +21,7 @@ services:
     volumes:
       - data_volume:/data_volume
     # Run app with a non-root user that matches the ownership set by the data_volume_init service
-    user: "${APP_UID:-1000}:${APP_UID:-1000}"
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
     # touch a file to indicate that the app is running with correct permissions, then sleep indefinitely
     command:
       - "sh"

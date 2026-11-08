@@ -46,14 +46,13 @@ def reorder_choices(choices, choices_order):
     >>> print(reorder_choices(choices, choices_order))
     [('published', 'Published'), ('editing', 'Editing'), ('archived', 'Archived'), ('hold', 'On Hold'), ('draft', 'Draft')]
     """
+    order_index = {value: i for i, value in enumerate(choices_order)}
     ordered = []
     unordered = []
     for choice, display_text in choices:
-        try:
-            index = choices_order.index(choice)
-        except ValueError:
+        if choice in order_index:
+            ordered.append((choice, display_text, order_index[choice]))
+        else:
             unordered.append((choice, display_text))
-            continue
-
-        ordered.insert(index, (choice, display_text))
-    return ordered + unordered
+    ordered.sort(key=lambda item: item[2])
+    return [(choice, display_text) for choice, display_text, _ in ordered] + unordered

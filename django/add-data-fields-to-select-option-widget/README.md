@@ -14,7 +14,7 @@ Useful when the browser needs extra metadata per choice (for example, toggling o
 DataAttributesSelectOptions(attrs=None, choices=(), data=None)
 ```
 
-- `attrs`: extra attributes for the `<option>` elements (not the `<select>` element).
+- `attrs`: extra attributes for the `<select>` element (standard Django `Select` attrs).
 - `choices`: standard Django choice tuples `(value, label)`.
 - `data`: dict mapping **choice value** → dict of attribute names and values (without the `data-` prefix).
 

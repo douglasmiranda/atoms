@@ -1,6 +1,6 @@
 # Elasticsearch date range helpers (Django)
 
-Small helpers to build timezone-aware `gte` / `lte` bounds from `datetime.date` values, and optional `elasticsearch-dsl` range filters for multi-date search.
+Small helpers to build timezone-aware `gte` / `lte` bounds from `datetime.date` values, and optional `elasticsearch.dsl` range filters for multi-date search.
 
 Useful when your UI sends calendar dates but your index stores datetimes on a field like `created`.
 

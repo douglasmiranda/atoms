@@ -10,10 +10,10 @@ class DateConverter:
     It can also convert a date object back to a string in the same format for URL reversing.
     Example usage in urls.py:
         from django.urls import path, register_converter
-        from .converters import DateConverter
+        from .dates import DateConverter
         register_converter(DateConverter, 'date')
         urlpatterns = [
-            path('events/<date:date>/', views.event_detail, name='event_detail'),
+            path('events/<date:event_date>/', views.event_detail, name='event_detail'),
         ]
     This will allow you to use URLs like /events/2023-10-01/ and have the date passed as a Python date object to your view.
     """

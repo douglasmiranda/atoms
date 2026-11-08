@@ -1,6 +1,6 @@
-# Deploy and rollback project using Docker Compose with git tag-based versioning.
+# Deploy and rollback project using Docker Compose with git commit hash versioning.
 
-This example shows how to deploy a project to production using Docker Compose with git tag-based versioning. It also includes a rollback task that allows you to rollback to a previous version in case of issues.
+This example shows how to deploy a project to production using Docker Compose, tagging images with the short git commit hash. It also includes a rollback task that starts the previously built image for an older commit.
 
 * This example assumes we are gonna deploy from our machine that have ssh access to the production server.
 * The production server is running Docker and Docker Compose.
@@ -11,6 +11,6 @@ Run `task deploy` to execute the deployment task.
 
 Task definitions in: [Taskfile.yml](./Taskfile.yml)
 
-It will build and tag in the production server using the short git commit hash as version tag.
+It will build and tag in the production server using the short git commit hash as the image tag.
 
-Run `task rollback:VERSION` to execute the rollback task, where VERSION is the short git commit hash to rollback to.
+Run `task rollback:VERSION` to execute the rollback task, where VERSION is the short git commit hash to rollback to. Rollback does not check out that commit; it starts the image that was built and tagged during that deploy. The image must still exist on the server.

@@ -18,7 +18,7 @@ class DataAttributesSelectOptions(forms.Select):
         >>> data = {1: {"foo": "foo"}, 2: {"bar": "bar"}}
         >>> widget = DataAttributesSelectOptions(choices=choices, data=data)
         >>> widget.render("name", 1)
-        `'<select name="name"><option value="1" data-foo="foo">Choice 1</option><option value="2" data-bar="bar">Choice 2</option></select>'`
+        `'<select name="name"><option value="1" selected data-foo="foo">Choice 1</option><option value="2" data-bar="bar">Choice 2</option></select>'`
 
         Important notes about data attributes:
         - The data attributes are prefixed with "data-" by default.

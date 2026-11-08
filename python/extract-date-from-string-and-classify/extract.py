@@ -12,50 +12,39 @@ from datetime import datetime
 # if format_key == "day_month_year": search database for day month year
 
 
+@dataclass
+class Date:
+    day: int
+    month: int
+    year: int = None
+    format_key: str = None
+
+    def date(self):
+        return datetime(self.year, self.month, self.day).date()
+
+
 def extract_date(text, formats=None):
     """Try to parse a date from a string given a list of formats.
     >>> extract_date("22/06")
-    >>> extract_date.<locals>.Date(day=22, month=6, year=1900, format_key='day_month')
+    Date(day=22, month=6, year=1900, format_key='day_month')
 
     >>> date = extract_date("22/06")
-
     >>> date.day
-    >>> 22
-
+    22
     >>> date.month
-    >>> 6
-
+    6
     >>> date.year
-    >>> 1900
-
+    1900
     >>> date.date()
-    >>> datetime.date(1900, 6, 22)
-
+    datetime.date(1900, 6, 22)
     >>> date.format_key
-    >>> 'day_month'
-
-    >>> if date and date.format_key == "day_month":
-            print("filter by day and month only")
-    filter by day and month only
+    'day_month'
     """
-
-    @dataclass
-    class Date:
-        day: int
-        month: int
-        year: int = None
-        format_key: str = None
-
-        def date(self):
-            return datetime(self.year, self.month, self.day).date()
-
     if not formats:
         formats = {"day_month": "%d/%m", "day_month_year": "%d/%m/%Y"}
 
-    for key in formats.keys():
-        normalized = text.strip()
-        fmt = formats[key]
-
+    normalized = text.strip()
+    for key, fmt in formats.items():
         if "%Y" not in fmt and "%y" not in fmt and "%G" not in fmt:
             # Parse with an explicit leap year to avoid ambiguous no-year parsing.
             sentinel_year = 2000

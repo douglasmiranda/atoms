@@ -23,10 +23,10 @@ From this folder:
 docker compose up -d
 ```
 
-Optional custom UID:
+Optional custom UID/GID:
 
 ```bash
-APP_UID=$(id -u) docker compose up -d
+APP_UID=$(id -u) APP_GID=$(id -g) docker compose up -d
 ```
 
 ## Verify

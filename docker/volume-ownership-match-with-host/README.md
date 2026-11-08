@@ -14,14 +14,17 @@ This is useful when using bind mounts (for example `./data:/data`) and you want 
 ## Files
 
 - `Dockerfile`: receives `UID`/`GID`, sets `/data` ownership, and switches to that user.
-- `compose.yml`: passes `UID`/`GID` build args and bind-mounts `./data:/data`.
+- `compose.yml`: passes `HOST_UID`/`HOST_GID` as image `UID`/`GID` build args and bind-mounts `./data:/data`.
 
 ## Run
 
-From this folder:
+From this folder. Create `./data` as your user first; if Compose creates it, it will be owned by root and the container user cannot write.
+
+`UID` is a readonly bash variable, so pass host IDs as `HOST_UID` / `HOST_GID`:
 
 ```bash
-UID=$(id -u) GID=$(id -g) docker compose up -d --build
+mkdir -p data
+HOST_UID=$(id -u) HOST_GID=$(id -g) docker compose up -d --build
 ```
 
 ## Verify

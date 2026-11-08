@@ -16,5 +16,5 @@ class MultipleChoiceArrayField(ArrayField):
     def to_python(self, value):
         res = super().to_python(value)
         if isinstance(res, list):
-            value = [self.base_field.to_python(val) for val in res]
-        return value
+            return [self.base_field.to_python(val) for val in res]
+        return res

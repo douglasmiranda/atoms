@@ -9,6 +9,8 @@ tasks:
   postgres-backup:
     desc: Backup Postgres database to a local file (uses postgres custom format .dump).
     vars:
+      TIMESTAMP:
+        sh: date +%Y%m%d-%H%M%S
       BACKUP_FILE: "postgres-{{.TIMESTAMP}}.dump"
     cmds:
       - docker compose exec postgres sh -c 'pg_dump --verbose -U $POSTGRES_USER -d $POSTGRES_DB -Fc' > {{.BACKUP_FILE}}

@@ -12,8 +12,10 @@ def is_changelist_view(model_admin_instance, request):
         @admin.register(Article)
         class ArticleAdmin(admin.ModelAdmin):
             def get_queryset(self, request):
+                queryset = super().get_queryset(request)
                 if is_changelist_view(self, request):
                     return queryset.only("title")
+                return queryset
     """
     opts = model_admin_instance.opts
     url_name = request.resolver_match.url_name

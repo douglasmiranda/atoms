@@ -36,9 +36,13 @@ Adjust `1.5rem` to change fade width.
 }
 
 .overflow-mask-both {
-  mask-image:
-    linear-gradient(to left, black calc(100% - 1.5rem), transparent 100%),
-    linear-gradient(to right, black calc(100% - 1.5rem), transparent 100%);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 1.5rem,
+    black calc(100% - 1.5rem),
+    transparent
+  );
 }
 ```
 
@@ -68,14 +72,9 @@ function getHorizontalOverflow(el) {
 function updateOverflowMasks(el) {
   const overflow = getHorizontalOverflow(el);
 
-  if (overflow.left && overflow.right) {
-    el.classList.add("overflow-mask-both");
-  } else {
-    el.classList.remove("overflow-mask-both");
-  }
-
-  el.classList.toggle("overflow-mask-left", overflow.left);
-  el.classList.toggle("overflow-mask-right", overflow.right);
+  el.classList.toggle("overflow-mask-both", overflow.left && overflow.right);
+  el.classList.toggle("overflow-mask-left", overflow.left && !overflow.right);
+  el.classList.toggle("overflow-mask-right", overflow.right && !overflow.left);
 }
 
 const container = document.querySelector(".overflow-items-container");

@@ -30,11 +30,14 @@ APP_UID=$(id -u) APP_GID=$(id -g) docker compose up -d --build
 
 ## Verify
 
+`docker compose exec` starts a new process and skips the entrypoint, so it runs as root (the image `USER`). Check the main process, or exec as the app user:
+
 ```bash
-docker compose exec app id
-docker compose exec app ls -lah /data
-docker compose exec app touch /data/testfile
-docker compose exec app ls -lah /data/testfile
+docker compose top
+docker compose exec --user "${APP_UID:-1001}:${APP_GID:-1001}" app id
+docker compose exec --user "${APP_UID:-1001}:${APP_GID:-1001}" app ls -lah /data
+docker compose exec --user "${APP_UID:-1001}:${APP_GID:-1001}" app touch /data/testfile
+docker compose exec --user "${APP_UID:-1001}:${APP_GID:-1001}" app ls -lah /data/testfile
 ```
 
 ## When gosu is useful

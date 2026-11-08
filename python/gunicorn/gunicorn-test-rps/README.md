@@ -6,7 +6,7 @@ Simple Flask endpoint to benchmark Gunicorn worker/thread combinations using `wr
 
 - `GET /?delay_ms=<int>&payload_kb=<int>`
 - `delay_ms` (default `0`): sleeps for the given milliseconds before responding.
-- `payload_kb` (default `0`): returns an extra payload of `x` bytes to simulate larger responses.
+- `payload_kb` (default `0`): extra payload size in kilobytes (`payload_kb * 1024` bytes of `x`).
 - `GET /healthz`: basic health endpoint.
 
 Example:

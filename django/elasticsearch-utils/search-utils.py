@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from django.utils import timezone
 from elasticsearch.dsl import Q as ESQFilter
@@ -17,16 +17,18 @@ def ensure_max_datetime(
 
     Example:
         ensure_max_datetime(datetime.date(2026, 5, 31))
-        -> datetime(2026, 5, 31, 23, 59, 59)
+        -> datetime.datetime(2026, 5, 31, 23, 59, 59, 999999)
 
     Example:
         ensure_max_datetime(datetime.date(2026, 5, 31), datetime.datetime(2026, 5, 31, 14, 00, 00))
-        -> datetime(2026, 5, 31, 14, 00, 00)
+        -> datetime.datetime(2026, 5, 31, 14, 00, 00)
     """
     if max_datetime_allowed is None:
         max_datetime_allowed = timezone.now()
 
-    max_datetime = timezone.make_aware(datetime.combine(date, datetime.max.time()))
+    max_datetime = timezone.make_aware(
+        datetime.datetime.combine(date, datetime.time.max)
+    )
     if max_datetime > max_datetime_allowed:
         return max_datetime_allowed
     return max_datetime
@@ -45,9 +47,11 @@ def make_range_datetime_filter(
 
     Example:
         make_range_datetime_filter(datetime.date(2026, 5, 31), datetime.date(2026, 6, 1))
-        -> {"gte": datetime(2026, 5, 31, 0, 0), "lte": datetime(2026, 6, 1, 23, 59, 59)}
+        -> {"gte": datetime.datetime(2026, 5, 31, 0, 0), "lte": datetime.datetime(2026, 6, 1, 23, 59, 59, 999999)}
     """
-    start_date = timezone.make_aware(datetime.combine(start, datetime.min.time()))
+    start_date = timezone.make_aware(
+        datetime.datetime.combine(start, datetime.time.min)
+    )
     end_date = ensure_max_datetime(end)
     return {"gte": start_date, "lte": end_date}
 
@@ -61,9 +65,9 @@ def my_collection_multiple_date_filters(dates: list[datetime.date]) -> list[ESQF
         list[ESQFilter]: List of date filters.
 
     Example:
-        publications_multiple_date_filters([datetime.date(2026, 5, 31), datetime.date(2026, 6, 1)])
-        [ESQFilter("range", created={"gte": datetime(2026, 5, 31, 0, 0), "lte": datetime(2026, 5, 31, 23, 59, 59)}),
-         ESQFilter("range", created={"gte": datetime(2026, 6, 1, 0, 0), "lte": datetime(2026, 6, 1, 23, 59, 59)})]
+        my_collection_multiple_date_filters([datetime.date(2026, 5, 31), datetime.date(2026, 6, 1)])
+        [ESQFilter("range", created={"gte": datetime.datetime(2026, 5, 31, 0, 0), "lte": datetime.datetime(2026, 5, 31, 23, 59, 59, 999999)}),
+         ESQFilter("range", created={"gte": datetime.datetime(2026, 6, 1, 0, 0), "lte": datetime.datetime(2026, 6, 1, 23, 59, 59, 999999)})]
     """
     if not dates:
         return []
@@ -72,6 +76,6 @@ def my_collection_multiple_date_filters(dates: list[datetime.date]) -> list[ESQF
     for date in dates:
         _filter = make_range_datetime_filter(start=date, end=date)
         # each date filter in the list looks like this:
-        # ESQFilter("range", created={"gte": datetime(2026, 5, 31, 0, 0), "lte": datetime(2026, 5, 31, 23, 59, 59)})
+        # ESQFilter("range", created={"gte": datetime.datetime(2026, 5, 31, 0, 0), "lte": datetime.datetime(2026, 5, 31, 23, 59, 59, 999999)})
         date_filters.append(ESQFilter("range", created=_filter))
     return date_filters

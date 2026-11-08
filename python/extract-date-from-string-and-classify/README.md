@@ -92,4 +92,4 @@ assert str(value.date()) == "2026-04-16"
 
 - Parsing is strict: the whole input must match one of the provided formats.
 - Only one match is returned: the first matching format in dict iteration order.
-- For `%d/%m`, Python uses year `1900` by default.
+- For `%d/%m`, year is `1900` by default. Feb 29 is stored as year `2000` so it remains a valid calendar date.

@@ -4,7 +4,7 @@ services:
 
   postgres:
     # Using postgres:trixie (based on Debian Trixie)
-    # Just so we have bash as the prefered way to enter the container for this example.
+    # Just so we have bash as the preferred way to enter the container for this example.
     image: postgres:trixie
     environment:
       # https://hub.docker.com/_/postgres#postgres_host_auth_method

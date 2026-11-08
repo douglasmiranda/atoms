@@ -8,9 +8,10 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
       # Watch when the status changes from ["pending delete"] to something else.
-      # this is the json:
-      # {... "status":["pending delete"] ...}
-      - "[BODY].status == [pending delete]"
+      # RDAP JSON looks like: {"status": ["pending delete"], ...}
+      # Gatus [BODY].status is the array; compare the first element.
+      # Do not write [pending delete] — square brackets are Gatus placeholders.
+      - "[BODY].status[0] == pending delete"
     alerts:
       - type: discord
         description: "Google.dev domain status changed from pending delete to some other status!"
